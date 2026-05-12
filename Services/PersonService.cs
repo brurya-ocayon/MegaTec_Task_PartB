@@ -51,13 +51,15 @@ public sealed class PersonService : IPersonService
         }
 
         var person = new Person
-        {
-            Id = Guid.NewGuid(),
-            FullName = dto.FullName,
-            Phone = dto.Phone,
-            Email = dto.Email,
-            ImagePath = imageRelativePath
-        };
+      {
+         Id = Guid.NewGuid(),
+         FirstName = dto.FirstName,
+         LastName = dto.LastName,
+         Phone = dto.Phone,
+          Email = dto.Email,
+         IsActive = dto.IsActive ?? true,
+         ImagePath = imageRelativePath
+      };
 
         await _dbContext.Persons.AddAsync(person, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
@@ -67,21 +69,51 @@ public sealed class PersonService : IPersonService
 
     public async Task<IReadOnlyList<Person>> GetAllPeopleAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Persons.AsNoTracking().OrderBy(p => p.FullName).ToListAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyList<Person>> SearchByNameAsync(string name, CancellationToken cancellationToken = default)
-    {
-        name ??= string.Empty;
         return await _dbContext.Persons.AsNoTracking()
-            .Where(p => p.FullName.Contains(name))
-            .OrderBy(p => p.FullName)
+            .OrderBy(p => p.LastName)
+            .ThenBy(p => p.FirstName)
             .ToListAsync(cancellationToken);
     }
 
+public async Task<IReadOnlyList<Person>> SearchByNameAsync(string name, CancellationToken cancellationToken = default)
+{
+    name ??= string.Empty;
+
+    var trimmed = name.Trim();
+
+    if (string.IsNullOrWhiteSpace(trimmed))
+    {
+        return await _dbContext.Persons.AsNoTracking()
+            .OrderBy(p => p.LastName)
+            .ThenBy(p => p.FirstName)
+            .ToListAsync(cancellationToken);
+    }
+
+    var alternate = KeyboardLayoutConverter.GetAlternateLayout(trimmed);
+
+    return await _dbContext.Persons.AsNoTracking()
+        .Where(p =>
+            p.FirstName.Contains(trimmed) ||
+            p.LastName.Contains(trimmed) ||
+            (p.FirstName + " " + p.LastName).Contains(trimmed) ||
+
+            (alternate != null && (
+                p.FirstName.Contains(alternate) ||
+                p.LastName.Contains(alternate) ||
+                (p.FirstName + " " + p.LastName).Contains(alternate)
+            ))
+        )
+        .OrderBy(p => p.LastName)
+        .ThenBy(p => p.FirstName)
+        .ToListAsync(cancellationToken);
+}
+
     public async Task<byte[]> ExportPeoplePdfAsync(CancellationToken cancellationToken = default)
     {
-        var people = await _dbContext.Persons.AsNoTracking().OrderBy(p => p.FullName).ToListAsync(cancellationToken);
+        var people = await _dbContext.Persons.AsNoTracking()
+            .OrderBy(p => p.LastName)
+            .ThenBy(p => p.FirstName)
+            .ToListAsync(cancellationToken);
 
         return Document.Create(container =>
         {
@@ -92,11 +124,12 @@ public sealed class PersonService : IPersonService
                 {
                     column.Spacing(8);
                     column.Item().Text("People").SemiBold().FontSize(18);
-                    column.Item().Text("Name | Phone | Email").SemiBold();
+                    column.Item().Text("First Name | Last Name | Phone | Email").SemiBold();
 
                     foreach (var person in people)
                     {
-                        column.Item().Text($"{person.FullName} | {person.Phone} | {person.Email}");
+                        column.Item().Text(
+                            $"{person.FirstName} | {person.LastName} | {person.Phone} | {person.Email}");
                     }
                 });
             });
