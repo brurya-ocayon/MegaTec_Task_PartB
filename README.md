@@ -1,207 +1,74 @@
-# MegaTec 
+MegaTec - Contact Management System
+A production-ready REST API built with ASP.NET Core (.NET 10) for advanced contact management. This project features SQL Server persistence, secure image uploads, PDF report generation, and a sophisticated search engine with keyboard layout awareness.
 
-REST API built with ASP.NET Core for contact management, including SQL Server persistence, image upload, advanced search capabilities, and PDF export functionality.
+🚀 Quick Start
+Prerequisites: Ensure .NET 10 SDK and SQL Server/LocalDB are installed.
 
----
+Configuration: Update the DefaultConnection in appsettings.json.
 
-## System Requirements
+Database Setup:
 
-- [.NET SDK](https://dotnet.microsoft.com/download) (`net10.0`)
-- SQL Server or LocalDB
-- Database connection configured in `appsettings.json` under `ConnectionStrings:DefaultConnection`
-
----
-
-## Quick Start
-
-```bash
+Bash
 dotnet restore
 dotnet ef database update
+Run:
+
+Bash
 dotnet run
-```
+Swagger UI is available in Development mode at /swagger.
 
-In Development mode, Swagger and Swagger UI are enabled according to the configuration in `Program.cs`.
+🛠 Project Architecture
+The system follows a Clean Layered Architecture to ensure separation of concerns and maintainability:
 
----
+Layer	Responsibility
+Controllers	PeopleController — RESTful endpoints managing the api/people route.
+Services	PersonService — Core business logic, file I/O, search algorithms, and PDF orchestration.
+Data	ApplicationDbContext — EF Core context with automated migration application on startup.
+Models/DTOs	Strongly typed entities and Data Transfer Objects for optimized request/response handling.
+🔄 The Part A to Part B Evolution
+A key requirement of this task was the strategic refactoring of existing code. The transition from a basic CRUD API (Part A) to an advanced system (Part B) involved:
 
-# Project Overview
+Schema Migration: Refactored the FullName field into FirstName and LastName. This included an EF Core Migration strategy that preserved existing data during the split.
 
-This project was developed as part of the MegaTec Full Stack assignment using ASP.NET Core and Entity Framework Core.
+Status Management: Integrated an IsActive state with optimized server-side filtering.
 
-The API provides a complete contact management solution with:
-- SQL Server persistence
-- Image upload support
-- Advanced search functionality
-- Reverse keyboard layout handling
-- PDF export generation
-- Layered architecture following clean separation of concerns
+Advanced Search Engine: Implemented a non-breaking extension to the search logic, allowing partial name matches.
 
-The project emphasizes maintainability, scalability, and production-oriented development practices.
+🧠 Special Features & Logic
+1. Reverse Keyboard Layout Search (Hebrew ↔ English)
+To solve the common user error of typing in the wrong language layout (e.g., "atv" instead of "אבי"), I implemented a centralized KeyboardLayoutConverter.
 
----
+Bidirectional Mapping: Supports both Hebrew-to-English and English-to-Hebrew.
 
-# Architecture Overview
+Seamless Integration: The search service automatically detects and converts queries without requiring additional input from the user.
 
-| Layer | Responsibility |
-|------|----------------|
-| **Controllers** | `PeopleController` — REST API endpoints under `api/people` |
-| **Services** | `PersonService` — business logic, file management, search logic, and PDF generation |
-| **Data** | `ApplicationDbContext` — EF Core database context |
-| **Models** | `Person` entity model |
-| **DTOs** | `PersonCreateDto` used for multipart/form-data requests |
+2. PDF Generation (QuestPDF)
+Utilizes the QuestPDF library under the Community License to generate professional, document-standard PDF reports for personnel records.
 
-The application automatically applies pending EF Core migrations on startup using `Database.Migrate()` to ensure schema synchronization.
+3. Modern Development Workflow (AI-Assisted)
+During development, Cursor was utilized to accelerate:
 
----
-# Transition from Part A to Part B
+Refactoring Safety: Ensuring model/DTO synchronization across layers after the FullName split.
 
-Part B was implemented as an extension of the existing Part A codebase without rebuilding the project from scratch, while maintaining backward compatibility and preserving the original API structure.
+Version Alignment: Maintaining strict compatibility between .NET 10 and the latest EF Core preview packages.
 
-The transition required coordinated updates across multiple application layers, including:
-- Entity models
-- DTOs
-- EF Core migrations
-- Service logic
-- API endpoints
-- Database schema
+Boilerplate Efficiency: Faster implementation of mapping logic and unit-test structures.
 
-The original `FullName` field was refactored into separate `FirstName` and `LastName` fields throughout the system, including database migration support for existing data.
+📋 Features List
+[x] Full CRUD Operations (Create, Read, Update, Delete)
 
-In addition, the project was expanded with:
-- `IsActive` status management
-- Advanced partial-name search
-- Reverse keyboard layout search support (Hebrew ↔ English)
-- Improved search maintainability using centralized keyboard conversion logic
+[x] Relational Persistence (SQL Server)
 
-All new functionality was integrated into the existing architecture while preserving the original functionality from Part A.
-During development, I used Cursor
- to assist with:
+[x] Multipart Image Upload with validation
 
-EF Core Version Alignment
-Ensuring compatibility between:
+[x] PDF Export via QuestPDF
 
-Microsoft.EntityFrameworkCore.SqlServer
-Microsoft.EntityFrameworkCore.Tools
-dotnet-ef
+[x] Smart Search with Keyboard Layout Awareness
 
-Cursor also helped quickly identify schema/model mismatches after structural changes such as replacing FullName with FirstName and LastName.
+[x] Automated Migrations on startup
 
-Keyboard Layout Conversion Logic
-Assisting in building the centralized KeyboardLayoutConverter, including:
-Hebrew ↔ English character mapping
-Bidirectional conversion support
-Integration into SearchByNameAsync without affecting existing API behavior
+External Dependencies
+QuestPDF: For report generation.
 
-Using Cursor significantly reduced time spent searching documentation and examples while helping maintain clean, layered architecture changes across:
+EF Core & SQL Server: For data persistence.
 
-Models
-DTOs
-Services
-EF Core migrations
-External Dependencies & Licensing
-QuestPDF
- — Community License (configured in Program.cs)
-Additional dependencies are listed in MegaTec_Task.csproj# MegaTec 
-
-REST API built with ASP.NET Core for contact management, including SQL Server persistence, image upload, advanced search capabilities, and PDF export functionality.
-
----
-
-## System Requirements
-
-- [.NET SDK](https://dotnet.microsoft.com/download) (`net10.0`)
-- SQL Server or LocalDB
-- Database connection configured in `appsettings.json` under `ConnectionStrings:DefaultConnection`
-
----
-
-## Quick Start
-
-```bash
-dotnet restore
-dotnet ef database update
-dotnet run
-```
-
-In Development mode, Swagger and Swagger UI are enabled according to the configuration in `Program.cs`.
-
----
-
-# Project Overview
-
-This project was developed as part of the MegaTec Full Stack assignment using ASP.NET Core and Entity Framework Core.
-
-The API provides a complete contact management solution with:
-- SQL Server persistence
-- Image upload support
-- Advanced search functionality
-- Reverse keyboard layout handling
-- PDF export generation
-- Layered architecture following clean separation of concerns
-
-The project emphasizes maintainability, scalability, and production-oriented development practices.
-
----
-
-# Architecture Overview
-
-| Layer | Responsibility |
-|------|----------------|
-| **Controllers** | `PeopleController` — REST API endpoints under `api/people` |
-| **Services** | `PersonService` — business logic, file management, search logic, and PDF generation |
-| **Data** | `ApplicationDbContext` — EF Core database context |
-| **Models** | `Person` entity model |
-| **DTOs** | `PersonCreateDto` used for multipart/form-data requests |
-
-The application automatically applies pending EF Core migrations on startup using `Database.Migrate()` to ensure schema synchronization.
-
----
-# Transition from Part A to Part B
-
-Part B was implemented as an extension of the existing Part A codebase without rebuilding the project from scratch, while maintaining backward compatibility and preserving the original API structure.
-
-The transition required coordinated updates across multiple application layers, including:
-- Entity models
-- DTOs
-- EF Core migrations
-- Service logic
-- API endpoints
-- Database schema
-
-The original `FullName` field was refactored into separate `FirstName` and `LastName` fields throughout the system, including database migration support for existing data.
-
-In addition, the project was expanded with:
-- `IsActive` status management
-- Advanced partial-name search
-- Reverse keyboard layout search support (Hebrew ↔ English)
-- Improved search maintainability using centralized keyboard conversion logic
-
-All new functionality was integrated into the existing architecture while preserving the original functionality from Part A.
-During development, I used Cursor
- to assist with:
-
-EF Core Version Alignment
-Ensuring compatibility between:
-
-Microsoft.EntityFrameworkCore.SqlServer
-Microsoft.EntityFrameworkCore.Tools
-dotnet-ef
-
-Cursor also helped quickly identify schema/model mismatches after structural changes such as replacing FullName with FirstName and LastName.
-
-Keyboard Layout Conversion Logic
-Assisting in building the centralized KeyboardLayoutConverter, including:
-Hebrew ↔ English character mapping
-Bidirectional conversion support
-Integration into SearchByNameAsync without affecting existing API behavior
-
-Using Cursor significantly reduced time spent searching documentation and examples while helping maintain clean, layered architecture changes across:
-
-Models
-DTOs
-Services
-EF Core migrations
-External Dependencies & Licensing
-QuestPDF
- — Community License (configured in Program.cs)
-Additional dependencies are listed in MegaTec_Task.csproj
